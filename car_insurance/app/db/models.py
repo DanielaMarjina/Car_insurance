@@ -146,61 +146,6 @@ class Car(Base):
     )
 
 
-class Owner(Base):
-    __tablename__ = "owners"
-    __table_args__ = (
-        CheckConstraint(
-            "length(name) BETWEEN 1 AND 255 "
-            "AND name ~ '^[A-Za-z]+( [A-Za-z]+)*$'",
-            name="ck_owners_name_format",
-        ).ddl_if(dialect="postgresql"),
-        CheckConstraint(
-            "birthdate >= DATE '1900-01-01' AND birthdate <= CURRENT_DATE",
-            name="ck_owners_birthdate_range",
-        ).ddl_if(dialect="postgresql"),
-        CheckConstraint(
-            "year_of_driver_license BETWEEN 1900 AND EXTRACT(YEAR FROM CURRENT_DATE)",
-            name="ck_owners_license_year_range",
-        ).ddl_if(dialect="postgresql"),
-    )
-
-    id: Mapped[uuid.UUID] = mapped_column(
-        Uuid,
-        primary_key=True,
-        default=uuid.uuid4,
-    )
-
-    name: Mapped[str] = mapped_column(String(255), nullable=False)
-    birthdate: Mapped[date] = mapped_column(Date, nullable=False)
-    year_of_driver_license: Mapped[int] = mapped_column(Integer, nullable=False)
-
-    driver_license_cat: Mapped[DriverLicenseCategory | None] = mapped_column(
-        SqlEnum(
-            DriverLicenseCategory,
-            values_callable=lambda enum: [item.value for item in enum],
-            native_enum=False,
-            create_constraint=True,
-            length=4,
-        ),
-        nullable=True,
-    )
-
-    email: Mapped[str | None] = mapped_column(
-        String(255),
-        nullable=True,
-        unique=True,
-        index=True,
-    )
-
-    cars: Mapped[list["Car"]] = relationship(
-        back_populates="owner",
-        cascade="all, delete-orphan",
-        passive_deletes=True,
-    )
-
-
-
-
 class InsurancePolicy(Base):
     __tablename__ = "insurance_policies"
     __table_args__ = (
