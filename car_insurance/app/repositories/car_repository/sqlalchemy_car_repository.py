@@ -37,6 +37,10 @@ class SqlAlchemyCarRepository(PaginationRepositoryMixin, CarRepository):
             per_page=per_page,
         )
 
+    def get_by_car_id(self, car_id: UUID) -> Car | None:
+        statement = select(Car).where(Car.id == car_id)
+        return self.db.scalar(statement)
+
     def _apply_filters(
         self,
         statement: Select,

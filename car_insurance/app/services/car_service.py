@@ -14,7 +14,7 @@ class CarService:
             self.repository = repository
 
     def get_by_id(self, car_id: UUID) -> Car:
-        car = self.repository.get_car_by_id(car_id)
+        car = self.repository.get_by_car_id(car_id)
         return car
 
     def get_categories(self) -> List[str]:

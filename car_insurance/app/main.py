@@ -3,6 +3,7 @@ from starlette.middleware.cors import CORSMiddleware
 
 from app.api.routers.cars import cars_router
 from app.api.routers.health import health_router
+from app.api.routers.insurance_policy import insurance_policy_router
 from app.api.routers.licenses import licenses_router
 from app.api.routers.owners import owners_router
 from app.exceptions.register_handlers import register_custom_exception_handlers
@@ -30,3 +31,5 @@ app.include_router(cars_router)
 register_custom_exception_handlers(app)
 
 app.include_router(health_router)
+
+app.include_router(insurance_policy_router)
