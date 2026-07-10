@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query,status
 
 from app.api.deps import get_car_service
 from app.api.schemas.car_schemas import CarDetailResponse
@@ -46,3 +46,4 @@ def get_cars(
         category=category,
         owner_id=owner_id
     )
+

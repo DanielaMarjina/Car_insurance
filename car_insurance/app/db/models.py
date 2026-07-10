@@ -18,6 +18,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 from app.utils.enums.car_category import CarCategory
 from app.utils.enums.driver_license_category import DriverLicenseCategory
+from app.utils.enums.status import Status
 
 
 class Base(DeclarativeBase):
@@ -137,3 +138,125 @@ class Car(Base):
 
     owner: Mapped["Owner"] = relationship(back_populates="cars")
     # TO DO: Add needed relationships
+
+    insurance_policies: Mapped[list["InsurancePolicy"]] = relationship(
+        back_populates="car",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+
+class Owner(Base):
+    __tablename__ = "owners"
+    __table_args__ = (
+        CheckConstraint(
+            "length(name) BETWEEN 1 AND 255 "
+            "AND name ~ '^[A-Za-z]+( [A-Za-z]+)*$'",
+            name="ck_owners_name_format",
+        ).ddl_if(dialect="postgresql"),
+        CheckConstraint(
+            "birthdate >= DATE '1900-01-01' AND birthdate <= CURRENT_DATE",
+            name="ck_owners_birthdate_range",
+        ).ddl_if(dialect="postgresql"),
+        CheckConstraint(
+            "year_of_driver_license BETWEEN 1900 AND EXTRACT(YEAR FROM CURRENT_DATE)",
+            name="ck_owners_license_year_range",
+        ).ddl_if(dialect="postgresql"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    birthdate: Mapped[date] = mapped_column(Date, nullable=False)
+    year_of_driver_license: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    driver_license_cat: Mapped[DriverLicenseCategory | None] = mapped_column(
+        SqlEnum(
+            DriverLicenseCategory,
+            values_callable=lambda enum: [item.value for item in enum],
+            native_enum=False,
+            create_constraint=True,
+            length=4,
+        ),
+        nullable=True,
+    )
+
+    email: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
+        unique=True,
+        index=True,
+    )
+
+    cars: Mapped[list["Car"]] = relationship(
+        back_populates="owner",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
+
+
+
+class InsurancePolicy(Base):
+    __tablename__ = "insurance_policies"
+    __table_args__ = (
+        CheckConstraint(
+            "end_date >= start_date",
+            name="ck_insurance_policies_dates",
+        ).ddl_if(dialect="postgresql"),
+        CheckConstraint(
+            "paid_amount >= 0",
+            name="ck_insurance_policies_paid_amount",
+        ).ddl_if(dialect="postgresql"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    car_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        ForeignKey("cars.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    provider: Mapped[str | None] = mapped_column(
+        String(100),
+        nullable=True,
+    )
+
+    start_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+    )
+
+    end_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+    )
+
+    status: Mapped[Status | None] = mapped_column(
+        SqlEnum(
+            Status,
+            values_callable=lambda enum: [item.value for item in enum],
+            native_enum=False,
+            create_constraint=True,
+            length=20,
+        ),
+        nullable=True,
+    )
+
+    paid_amount: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2),
+        nullable=False,
+    )
+
+    car: Mapped["Car"] = relationship(
+        back_populates="insurance_policies",
+    )
