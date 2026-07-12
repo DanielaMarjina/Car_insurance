@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.routers.cars import cars_router
+from app.api.routers.claim import claim_router
 from app.api.routers.health import health_router
 from app.api.routers.insurance_policy import insurance_policy_router
 from app.api.routers.licenses import licenses_router
@@ -33,3 +34,5 @@ register_custom_exception_handlers(app)
 app.include_router(health_router)
 
 app.include_router(insurance_policy_router)
+
+app.include_router(claim_router)
