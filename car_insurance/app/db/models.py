@@ -13,6 +13,7 @@ from sqlalchemy import (
     String,
     Text,
     Uuid,
+    func
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
@@ -145,6 +146,12 @@ class Car(Base):
         passive_deletes=True,
     )
 
+    claims: Mapped[list["Claim"]] = relationship(
+        back_populates="car",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+    )
+
 
 class InsurancePolicy(Base):
     __tablename__ = "insurance_policies"
@@ -204,4 +211,68 @@ class InsurancePolicy(Base):
 
     car: Mapped["Car"] = relationship(
         back_populates="insurance_policies",
+    )
+
+
+class Claim(Base):
+    __tablename__ = "claims"
+
+    __table_args__ = (
+        CheckConstraint(
+            "claim_date >= DATE '1900-01-01' "
+            "AND claim_date <= CURRENT_DATE",
+            name="ck_claims_claim_date_range",
+        ).ddl_if(dialect="postgresql"),
+
+        CheckConstraint(
+            "length(description) BETWEEN 1 AND 2000",
+            name="ck_claims_description_length",
+        ).ddl_if(dialect="postgresql"),
+
+        CheckConstraint(
+            "amount > 0",
+            name="ck_claims_amount_positive",
+        ).ddl_if(dialect="postgresql"),
+
+        CheckConstraint(
+            "amount < 1000000",
+            name="ck_claims_amount_reasonable",
+        ).ddl_if(dialect="postgresql"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        primary_key=True,
+        default=uuid.uuid4,
+    )
+
+    car_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        ForeignKey("cars.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+
+    claim_date: Mapped[date] = mapped_column(
+        Date,
+        nullable=False,
+    )
+
+    description: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    amount: Mapped[Decimal] = mapped_column(
+        Numeric(12, 2),
+        nullable=False,
+    )
+
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+        nullable=False,
+    )
+
+    car: Mapped["Car"] = relationship(
+        back_populates="claims",
     )
