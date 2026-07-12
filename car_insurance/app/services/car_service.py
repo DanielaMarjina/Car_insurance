@@ -5,7 +5,6 @@ from app.api.schemas.car_schemas import CarDetailResponse
 from app.api.schemas.pagination_schemas import PaginatedResponse
 from app.db.models import Car
 from app.repositories.car_repository.base import CarRepository
-from app.utils.enums import car_category
 from app.utils.enums.car_category import CarCategory
 
 
