@@ -161,9 +161,33 @@ class InsurancePolicy(Base):
             name="ck_insurance_policies_dates",
         ).ddl_if(dialect="postgresql"),
         CheckConstraint(
-            "paid_amount >= 0",
-            name="ck_insurance_policies_paid_amount",
+            "paid_amount > 0",
+            name="ck_policy_paid_amount_positive",
         ).ddl_if(dialect="postgresql"),
+        CheckConstraint(
+            "paid_amount <= 1000000",
+            name="ck_policy_paid_amount_max",
+        ).ddl_if(dialect="postgresql"),
+        CheckConstraint(
+            "start_date >= DATE '1900-01-01' "
+            "AND start_date <= DATE '2100-12-31'",
+            name="ck_policy_start_date_range",
+        ).ddl_if(dialect="postgresql"),
+
+        CheckConstraint(
+            "end_date >= DATE '1900-01-01' "
+            "AND end_date <= DATE '2100-12-31'",
+            name="ck_policy_end_date_range",
+        ).ddl_if(dialect="postgresql"),
+        CheckConstraint(
+            "provider IS NULL OR length(provider) BETWEEN 1 AND 100",
+            name="ck_policy_provider_length",
+        ).ddl_if(dialect="postgresql"),
+        CheckConstraint(
+            "provider IS NULL OR provider ~ '^[A-Za-z0-9]+( [A-Za-z0-9]+)*$'",
+            name="ck_policy_provider_format",
+        ).ddl_if(dialect="postgresql"),
+
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
