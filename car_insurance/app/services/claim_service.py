@@ -1,3 +1,5 @@
+from datetime import date
+
 from fastapi import HTTPException
 from uuid import UUID
 
@@ -21,12 +23,20 @@ class ClaimService:
         if request.amount<=0:
             raise HTTPException(status_code=400, detail="Amount cannot be negative or zero")
 
-        if request.amount>=1000000:
-            raise HTTPException(status_code=400, detail="Amount cannot be greater than 1000000")
+        if request.amount>1000000:
+            raise HTTPException(status_code=400, detail="Amount cannot be 1000000 or greater")
 
+        if len(request.description)>2000:
+            raise HTTPException(status_code=400, detail="Description must be less than 2000 characters")
 
         if not request.description.strip():
-            raise HTTPException(status_code=400, detail="Must enter a description")
+            raise HTTPException(status_code=400, detail="Description cannot be empty")
+
+        if request.claim_date<date(1900,1,1):
+            raise HTTPException(status_code=400, detail="Claim date cannot be before 1900-01-01")
+
+        if request.claim_date>date.today():
+            raise HTTPException(status_code=400, detail="Claim date cannot be after today's date")
 
         claim = Claim(
             car_id=car_id,
