@@ -22,3 +22,10 @@ class InsurancePolicyDetailResponse(BaseModel):
     end_date: date
     paid_amount: float
     status: str
+
+class InsuranceValidityResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    car_id:UUID
+    date:date
+    valid:bool

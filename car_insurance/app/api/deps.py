@@ -12,7 +12,7 @@ from app.services.owner_service import OwnerService
 
 
 def get_car_service(
-    db: Session = Depends(get_db),
+        db: Session = Depends(get_db),
 ) -> CarService:
     car_repository = SqlAlchemyCarRepository(db)
     return CarService(car_repository)
@@ -25,8 +25,9 @@ def get_owner_service(
 
     return OwnerService(owner_repository)
 
+
 def get_insurance_policy_service(
-    db: Session = Depends(get_db),
+        db: Session = Depends(get_db),
 ) -> InsurancePolicyService:
     insurance_policy_repository = SqlAlchemyInsurancePolicyRepository(db)
     car_repository = SqlAlchemyCarRepository(db)

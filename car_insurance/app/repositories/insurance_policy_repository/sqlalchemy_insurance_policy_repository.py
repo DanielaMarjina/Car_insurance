@@ -1,8 +1,11 @@
+from datetime import date
+from uuid import UUID
 
+from sqlalchemy import select
 from sqlalchemy.sql import Select
 from sqlalchemy.orm import Session
 
-from app.db.models import Owner, InsurancePolicy
+from app.db.models import Owner, InsurancePolicy, Car
 from app.repositories.insurance_policy_repository.base import InsurancePolicyRepository
 from app.repositories.paginator import PaginationRepositoryMixin
 
@@ -19,6 +22,15 @@ class SqlAlchemyInsurancePolicyRepository(PaginationRepositoryMixin, InsurancePo
 
         return insurance_policy
 
+    def has_valid_insurance_policy(self, car_id, date ):
+        statement = select(InsurancePolicy).where(
+            InsurancePolicy.car_id == car_id,
+            InsurancePolicy.start_date<=date,
+            InsurancePolicy.end_date>=date,
+        )
+        policy= self.db.scalar(statement)
+
+        return policy is not None
 
     def _apply_filters(
             self,
