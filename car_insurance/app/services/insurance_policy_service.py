@@ -1,5 +1,5 @@
 from uuid import UUID
-
+import re
 from fastapi import HTTPException
 from datetime import date
 from app.api.schemas.insurance_policy_schemas import InsurancePolicyCreate, InsuranceValidityResponse
@@ -27,11 +27,53 @@ class InsurancePolicyService:
                 detail="endDate must be greater than or equal to startDate",
             )
 
-        if request.start_date.year < 1900 and request.end_date.year > 2100:
+        if (
+                request.start_date.year < 1900
+                or request.start_date.year > 2100
+                or request.end_date.year < 1900
+                or request.end_date.year > 2100
+        ):
             raise HTTPException(
                 status_code=400,
-                detail="The date should be a realistic year, between 1900 and 2100"
+                detail="Dates must have a year between 1900 and 2100",
             )
+
+        if request.paid_amount <= 0:
+            raise HTTPException(
+                status_code=400,
+                detail="Paid amount must be greater than 0",
+            )
+
+        if request.paid_amount > 1000000:
+            raise HTTPException(
+                status_code=400,
+                detail="Paid amount must be less than or equal to 1000000",
+            )
+
+        if request.provider is not None:
+
+            if len(request.provider) < 1:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Provider must contain at least 1 character",
+                )
+
+            if len(request.provider) > 100:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Provider must contain at most 100 characters",
+                )
+
+            if not re.fullmatch(
+                    r"[A-Za-z0-9]+( [A-Za-z0-9]+)*",
+                    request.provider,
+            ):
+                raise HTTPException(
+                    status_code=400,
+                    detail="Invalid provider",
+                )
+
+
 
         insurance_policy = InsurancePolicy(
             car_id=car_id,
