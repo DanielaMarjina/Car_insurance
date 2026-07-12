@@ -1,11 +1,8 @@
-from datetime import date
-from uuid import UUID
-
 from sqlalchemy import select
 from sqlalchemy.sql import Select
 from sqlalchemy.orm import Session
 
-from app.db.models import Owner, InsurancePolicy, Car
+from app.db.models import InsurancePolicy
 from app.repositories.insurance_policy_repository.base import InsurancePolicyRepository
 from app.repositories.paginator import PaginationRepositoryMixin
 

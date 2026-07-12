@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, Query,status
 from app.api.deps import get_car_service
 from app.api.schemas.car_schemas import CarDetailResponse
 from app.api.schemas.pagination_schemas import PaginatedResponse
-from app.db.models import Car
 from app.services.car_service import CarService
 from app.utils.enums.car_category import CarCategory
 
