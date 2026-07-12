@@ -1,5 +1,4 @@
 from sqlalchemy import select
-from sqlalchemy.sql import Select
 from sqlalchemy.orm import Session
 
 from app.db.models import InsurancePolicy
@@ -28,23 +27,3 @@ class SqlAlchemyInsurancePolicyRepository(PaginationRepositoryMixin, InsurancePo
         policy= self.db.scalar(statement)
 
         return policy is not None
-
-    def _apply_filters(
-            self,
-            statement: Select,
-    ) -> Select:
-        filters = []
-
-        if not filters:
-            return statement
-
-        return statement.where(*filters)
-
-    @staticmethod
-    def _escape_like(value: str) -> str:
-        return (
-            value
-            .replace("\\", "\\\\")
-            .replace("%", "\\%")
-            .replace("_", "\\_")
-        )
