@@ -20,3 +20,11 @@ class CarValidationError(AppException):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             error_code="car_validation_error",
         )
+
+class CarAlreadyExistsError(AppException):
+    def __init__(self, vin: str):
+        super().__init__(
+            message=f"Car with vin {vin} already exists",
+            status_code=status.HTTP_409_CONFLICT,
+            error_code="car_vin_already_exists",
+        )

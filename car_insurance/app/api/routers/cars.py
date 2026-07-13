@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query,status
 
 from app.api.deps import get_car_service
 from app.api.responses import error_responses
-from app.api.schemas.car_schemas import CarDetailResponse
+from app.api.schemas.car_schemas import CarDetailResponse, CarCreate
 from app.api.schemas.pagination_schemas import PaginatedResponse
 from app.services.car_service import CarService
 from app.utils.enums.car_category import CarCategory
@@ -48,3 +48,18 @@ def get_cars(
         category=category,
         owner_id=owner_id
     )
+
+@cars_router.post(
+    "/create",
+    response_model=CarDetailResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Create car",
+    description=("Create a new car."),
+    responses=error_responses(400, 409, 500),
+)
+def create_car(
+        car_data: CarCreate,
+        car_service: CarService = Depends(get_car_service),
+):
+
+    return car_service.create_car(car_data)
