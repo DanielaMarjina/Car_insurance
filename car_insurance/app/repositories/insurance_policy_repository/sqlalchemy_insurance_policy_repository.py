@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -27,3 +29,7 @@ class SqlAlchemyInsurancePolicyRepository(PaginationRepositoryMixin, InsurancePo
         policy= self.db.scalar(statement)
 
         return policy is not None
+
+    def get_by_car_id(self, car_id:UUID) -> list[InsurancePolicy]:
+        statement = select(InsurancePolicy).where(InsurancePolicy.car_id == car_id)
+        return list(self.db.scalars(statement).all())

@@ -20,4 +20,9 @@ class InsurancePolicyRepository(Protocol):
             date:date
     )->bool:...
 
+    def get_by_car_id(
+            self,
+            car_id:UUID,
+    )->list[InsurancePolicy]:...
+
 
