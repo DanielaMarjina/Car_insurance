@@ -4,6 +4,10 @@ from fastapi import HTTPException
 from datetime import date
 from app.api.schemas.insurance_policy_schemas import InsurancePolicyCreate, InsuranceValidityResponse
 from app.db.models import InsurancePolicy
+from app.exceptions.amount_exceptions import AmountValidationError
+from app.exceptions.car_exceptions import CarNotFoundError
+from app.exceptions.date_exceptions import EndDateStartDateValidationError, DateYearValidationError
+from app.exceptions.provider_exceptions import ProviderValidationError, ProviderFormatValidationError
 from app.repositories.car_repository.base import CarRepository
 from app.repositories.insurance_policy_repository.base import InsurancePolicyRepository
 from app.utils.enums.status import Status
@@ -19,13 +23,10 @@ class InsurancePolicyService:
         existing_car = self.car_repository.get_by_car_id(car_id)
 
         if not existing_car:
-            raise HTTPException(status_code=404, detail="Car not found")
+            raise CarNotFoundError(car_id)
 
         if request.end_date < request.start_date:
-            raise HTTPException(
-                status_code=400,
-                detail="endDate must be greater than or equal to startDate",
-            )
+            raise EndDateStartDateValidationError(request.start_date, request.end_date)
 
         if (
                 request.start_date.year < 1900
@@ -33,47 +34,27 @@ class InsurancePolicyService:
                 or request.end_date.year < 1900
                 or request.end_date.year > 2100
         ):
-            raise HTTPException(
-                status_code=400,
-                detail="Dates must have a year between 1900 and 2100",
-            )
+            raise DateYearValidationError()
 
         if request.paid_amount <= 0:
-            raise HTTPException(
-                status_code=400,
-                detail="Paid amount must be greater than 0",
-            )
+            raise AmountValidationError(request.paid_amount)
 
         if request.paid_amount > 1000000:
-            raise HTTPException(
-                status_code=400,
-                detail="Paid amount must be less than or equal to 1000000",
-            )
+            raise AmountValidationError(request.paid_amount)
 
         if request.provider is not None:
 
             if len(request.provider) < 1:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Provider must contain at least 1 character",
-                )
+                raise ProviderValidationError(request.provider)
 
             if len(request.provider) > 100:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Provider must contain at most 100 characters",
-                )
+                raise ProviderValidationError(request.provider)
 
             if not re.fullmatch(
                     r"[A-Za-z0-9]+( [A-Za-z0-9]+)*",
                     request.provider,
             ):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Invalid provider",
-                )
-
-
+                raise ProviderFormatValidationError(request.provider)
 
         insurance_policy = InsurancePolicy(
             car_id=car_id,
@@ -90,14 +71,11 @@ class InsurancePolicyService:
         existing_car = self.car_repository.get_by_car_id(car_id)
 
         if not existing_car:
-            raise HTTPException(status_code=404, detail="Car not found")
+            raise CarNotFoundError(car_id)
 
         if (date.year > 2100
                 or date.year < 1900):
-            raise HTTPException(
-                status_code=400,
-                detail="The date should be a realistic year, between 1900 and 2100",
-            )
+            raise DateYearValidationError()
 
         valid=self.insurance_policy_repository.has_valid_insurance_policy(
             car_id,
