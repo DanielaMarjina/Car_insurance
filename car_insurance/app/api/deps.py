@@ -2,11 +2,13 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
+from app.repositories import claim_repository
 from app.repositories.car_repository.sqlalchemy_car_repository import SqlAlchemyCarRepository
 from app.repositories.claim_repository.sqlalchemy_claim_repository import SQLAlchemyClaimRepository
 from app.repositories.insurance_policy_repository.sqlalchemy_insurance_policy_repository import \
     SqlAlchemyInsurancePolicyRepository
 from app.repositories.owner_repository.sqlalchemy_owner_repository import SqlAlchemyOwnerRepository
+from app.services.car_history_sevice import CarHistoryService
 from app.services.car_service import CarService
 from app.services.claim_service import ClaimService
 from app.services.insurance_policy_service import InsurancePolicyService
@@ -46,6 +48,19 @@ def get_claim_service(
     car_repository=SqlAlchemyCarRepository(db)
 
     return ClaimService(
+        claim_repository,
+        car_repository,
+    )
+
+def get_car_history_service(
+        db: Session = Depends(get_db),
+)->CarHistoryService:
+    insurance_policy_repository = SqlAlchemyInsurancePolicyRepository(db)
+    claim_repository=SQLAlchemyClaimRepository(db)
+    car_repository=SqlAlchemyCarRepository(db)
+
+    return CarHistoryService(
+        insurance_policy_repository,
         claim_repository,
         car_repository,
     )

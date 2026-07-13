@@ -37,8 +37,19 @@ class SqlAlchemyCarRepository(PaginationRepositoryMixin, CarRepository):
             per_page=per_page,
         )
 
+    def create_car(self, car: Car) -> Car:
+        self.db.add(car)
+        self.db.commit()
+        self.db.refresh(car)
+
+        return car
+
     def get_by_car_id(self, car_id: UUID) -> Car | None:
         statement = select(Car).where(Car.id == car_id)
+        return self.db.scalar(statement)
+
+    def get_by_vin(self, vin: str) -> Car | None:
+        statement = select(Car).where(Car.vin == vin)
         return self.db.scalar(statement)
 
     def _apply_filters(

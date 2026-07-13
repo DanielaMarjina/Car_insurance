@@ -1,3 +1,6 @@
+from uuid import UUID
+
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.db.models import Claim
@@ -17,3 +20,7 @@ class SQLAlchemyClaimRepository(PaginationRepositoryMixin,ClaimRepository):
         self.db.commit()
         self.db.refresh(claim)
         return claim
+
+    def get_by_car_id(self, car_id:UUID) -> list[Claim]:
+        statement = select(Claim).where(Claim.car_id == car_id)
+        return list(self.db.scalars(statement).all())

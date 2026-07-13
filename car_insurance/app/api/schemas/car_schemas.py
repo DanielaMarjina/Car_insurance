@@ -20,7 +20,7 @@ class CarDetailResponse(BaseModel):
     power:int
     owner:OwnerResponse
 
-_VIN_PATTERN = re.compile(r"^[A-Za-z0-9]{16}$")
+_VIN_PATTERN = re.compile(r"^[A-Za-z0-9]{17}$")
 _NAME_PATTERN = re.compile(r"^(?=.{1,150}$)[A-Za-z0-9]+(?: [A-Za-z0-9]+)*$")
 
 
@@ -32,13 +32,14 @@ class CarCreate(BaseModel):
     category: CarCategory | None = None
     cc: int
     power: int
+    owner_id:UUID
 
     @field_validator("vin")
     @classmethod
     def validate_vin(cls, vin: str) -> str:
         if not _VIN_PATTERN.fullmatch(vin):
             raise CarValidationError(
-                "VIN must contain exactly 16 alphanumeric characters"
+                "VIN must contain exactly 17 alphanumeric characters"
             )
 
         return vin

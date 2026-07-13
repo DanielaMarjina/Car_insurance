@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 import logging
+
+from app.api.routers.car_history import car_history_router
 from app.api.routers.cars import cars_router
 from app.api.routers.claim import claim_router
 from app.api.routers.health import health_router
@@ -39,3 +41,5 @@ app.include_router(health_router)
 app.include_router(insurance_policy_router)
 
 app.include_router(claim_router)
+
+app.include_router(car_history_router)
