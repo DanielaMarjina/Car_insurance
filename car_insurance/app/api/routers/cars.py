@@ -1,8 +1,9 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query,status
+from fastapi import APIRouter, Depends, Query
 
 from app.api.deps import get_car_service
+from app.api.responses import error_responses
 from app.api.schemas.car_schemas import CarDetailResponse
 from app.api.schemas.pagination_schemas import PaginatedResponse
 from app.services.car_service import CarService
@@ -16,6 +17,8 @@ cars_router = APIRouter(prefix="/api/cars", tags=["Cars"])
     response_model=list[str],
     summary="Get car categories",
     description="Returns the available car categories.",
+    responses=error_responses(404),
+
 )
 def get_car_categories(car_service: CarService = Depends(get_car_service),
                        ) -> list[str]:
@@ -45,4 +48,3 @@ def get_cars(
         category=category,
         owner_id=owner_id
     )
-

@@ -22,7 +22,6 @@ class OwnerEmailAlreadyExistsError(AppException):
             error_code="owner_email_already_exists",
         )
 
-
 class OwnerValidationError(AppException):
     def __init__(self, message: str):
         super().__init__(
