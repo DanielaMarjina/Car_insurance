@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
-
+import logging
 from app.api.routers.cars import cars_router
 from app.api.routers.claim import claim_router
 from app.api.routers.health import health_router
@@ -10,6 +10,8 @@ from app.api.routers.owners import owners_router
 from app.exceptions.register_handlers import register_custom_exception_handlers
 from app.middleware.pagination import PaginationMiddleware
 from app.utils.logging import configure_logging
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Insurance API",
@@ -24,6 +26,7 @@ app.add_middleware(
     allow_headers=["*"],        # Allow all headers
 )
 configure_logging()
+logger.info("Application started")
 app.add_middleware(PaginationMiddleware)
 
 app.include_router(licenses_router)
