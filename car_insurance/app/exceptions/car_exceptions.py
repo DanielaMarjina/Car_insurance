@@ -13,3 +13,10 @@ class CarNotFoundError(AppException):
             error_code="car_not_found",
         )
 
+class CarValidationError(AppException):
+    def __init__(self, message: str):
+        super().__init__(
+            message=message,
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            error_code="car_validation_error",
+        )
