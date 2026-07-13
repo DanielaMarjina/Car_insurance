@@ -22,7 +22,7 @@ class InsurancePolicyCreate(BaseModel):
     @classmethod
     def validate_provider(cls, provider: str) -> str:
         if not _PROVIDER_PATTERN.fullmatch(provider):
-            raise ProviderValidationError()
+            raise ProviderValidationError(provider)
 
         return provider
 
