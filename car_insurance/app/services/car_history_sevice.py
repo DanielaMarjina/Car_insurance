@@ -19,9 +19,11 @@ class CarHistoryService:
         self.car_repository = car_repository
 
     def get_car_history(self, car_id: UUID) -> list[CarHistoryResponse]:
+        logger.info(f"Getting car history for {car_id}")
         existing_car = self.car_repository.get_by_car_id(car_id)
 
         if not existing_car:
+            logger.warning(f"Car with id {car_id} not found")
             raise CarNotFoundError(car_id)
 
         policies = self.insurance_policy_repository.get_by_car_id(car_id)
@@ -55,4 +57,6 @@ class CarHistoryService:
             )
 
         history.sort(key=lambda x: x.start_date if x.type=="POLICY" else x.claim_date)
+
+        logger.info(f"Found {len(history)} policies")
         return history
