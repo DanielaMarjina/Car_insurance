@@ -1,3 +1,4 @@
+from typing import Literal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends
@@ -9,5 +10,7 @@ car_history_router = APIRouter(prefix="/api/cars", tags=["Car History"])
 
 
 @car_history_router.get("/{car_id}/history", response_model=list[CarHistoryResponse])
-def get_car_history(car_id: UUID, car_history_service: CarHistoryService = Depends(get_car_history_service), ):
-    return car_history_service.get_car_history(car_id)
+def get_car_history(car_id: UUID,
+                    type: Literal["POLICY", "CLAIM"] | None = None,
+                    car_history_service: CarHistoryService = Depends(get_car_history_service), ):
+    return car_history_service.get_car_history(car_id,type)
