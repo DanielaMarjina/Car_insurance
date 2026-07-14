@@ -2,7 +2,11 @@ from uuid import UUID
 import re
 import logging
 from datetime import date
-from app.api.schemas.insurance_policy_schemas import InsurancePolicyCreate, InsuranceValidityResponse
+
+
+from app.api.schemas.insurance_policy_schemas import InsurancePolicyCreate, InsuranceValidityResponse, \
+    InsurancePolicyDetailResponse
+from app.api.schemas.pagination_schemas import PaginatedResponse
 from app.db.models import InsurancePolicy
 from app.exceptions.amount_exceptions import AmountValidationError
 from app.exceptions.car_exceptions import CarNotFoundError
@@ -14,10 +18,20 @@ from app.utils.enums.status import Status
 
 logger = logging.getLogger(__name__)
 
+
 class InsurancePolicyService:
     def __init__(self, insurance_policy_repository: InsurancePolicyRepository, car_repository: CarRepository):
         self.insurance_policy_repository = insurance_policy_repository
         self.car_repository = car_repository
+
+    def get_policies(self,
+                     page: int = 1,
+                     per_page: int = 50,
+                     provider: str | None = None,
+                     status: Status | None = None,
+    ) -> PaginatedResponse[InsurancePolicyDetailResponse]:
+        logger.info("Retrieving policies")
+        return self.insurance_policy_repository.get_policies(page=page, per_page=per_page, provider=provider, status=status)
 
     def create_insurance_policy(self, car_id: UUID, request: InsurancePolicyCreate):
         logger.info(f"Creating insurance policy for {car_id}")
@@ -91,9 +105,9 @@ class InsurancePolicyService:
             logger.warning(f"Year {date.year} is before 1900 or after 2100")
             raise DateYearValidationError()
 
-        valid=self.insurance_policy_repository.has_valid_insurance_policy(
+        valid = self.insurance_policy_repository.has_valid_insurance_policy(
             car_id,
             date,
         )
         logger.info(f"Valid insurance policy for {car_id}")
-        return InsuranceValidityResponse(car_id=car_id,date=date,valid=valid)
+        return InsuranceValidityResponse(car_id=car_id, date=date, valid=valid)

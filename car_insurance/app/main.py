@@ -9,6 +9,7 @@ from app.api.routers.health import health_router
 from app.api.routers.insurance_policy import insurance_policy_router
 from app.api.routers.licenses import licenses_router
 from app.api.routers.owners import owners_router
+from app.api.routers.policies import policies_router
 from app.exceptions.register_handlers import register_custom_exception_handlers
 from app.middleware.pagination import PaginationMiddleware
 from app.utils.logging import configure_logging
@@ -43,3 +44,5 @@ app.include_router(insurance_policy_router)
 app.include_router(claim_router)
 
 app.include_router(car_history_router)
+
+app.include_router(policies_router)
