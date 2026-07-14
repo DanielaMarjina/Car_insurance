@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlalchemy import select, Select
 from sqlalchemy.orm import Session
 
+from app.api.schemas.insurance_policy_schemas import InsurancePolicyDetailResponse
 from app.api.schemas.pagination_schemas import PaginatedResponse
 from app.db.models import InsurancePolicy
 from app.repositories.insurance_policy_repository.base import InsurancePolicyRepository
@@ -31,6 +32,13 @@ class SqlAlchemyInsurancePolicyRepository(PaginationRepositoryMixin, InsurancePo
             page=page,
             per_page=per_page,
         )
+
+    def get_active_policy_for_car(self, car_id : UUID) ->InsurancePolicyDetailResponse:
+        statement = select(InsurancePolicy).where(
+            InsurancePolicy.car_id == car_id,
+            InsurancePolicy.status == Status.ACTIVE,
+        )
+        return self.db.scalar(statement)
 
     def create_insurance_policy(self, insurance_policy: InsurancePolicy) -> InsurancePolicy:
         self.db.add(insurance_policy)

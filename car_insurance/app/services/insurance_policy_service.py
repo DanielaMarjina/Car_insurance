@@ -11,6 +11,7 @@ from app.db.models import InsurancePolicy
 from app.exceptions.amount_exceptions import AmountValidationError
 from app.exceptions.car_exceptions import CarNotFoundError
 from app.exceptions.date_exceptions import EndDateStartDateValidationError, DateYearValidationError
+from app.exceptions.policy_exceptions import PolicyNotFoundError
 from app.exceptions.provider_exceptions import ProviderValidationError, ProviderFormatValidationError
 from app.repositories.car_repository.base import CarRepository
 from app.repositories.insurance_policy_repository.base import InsurancePolicyRepository
@@ -32,6 +33,25 @@ class InsurancePolicyService:
     ) -> PaginatedResponse[InsurancePolicyDetailResponse]:
         logger.info("Retrieving policies")
         return self.insurance_policy_repository.get_policies(page=page, per_page=per_page, provider=provider, status=status)
+
+    def get_active_policy_for_car(self, car_id : UUID):
+        logger.info(f"Getting active policy for {car_id}")
+
+        existing_car = self.car_repository.get_by_car_id(car_id)
+
+        if not existing_car:
+            logger.warning(f"Car with id {car_id} does not exist")
+            raise CarNotFoundError(car_id)
+
+        policy = self.insurance_policy_repository.get_active_policy_for_car(car_id)
+
+        if policy is None:
+            logger.warning(f"No active policy found for car {car_id}")
+            raise PolicyNotFoundError(car_id)
+
+        return policy
+
+
 
     def create_insurance_policy(self, car_id: UUID, request: InsurancePolicyCreate):
         logger.info(f"Creating insurance policy for {car_id}")
