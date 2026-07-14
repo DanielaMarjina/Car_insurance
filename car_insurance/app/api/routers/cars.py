@@ -76,3 +76,13 @@ def create_car(
 )
 def delete_car(car_id: UUID, car_service: CarService = Depends(get_car_service),)->None:
     car_service.delete_car(car_id)
+
+@cars_router.get(
+    "/{car_id}",
+    response_model=CarDetailResponse,
+    summary="Get car by its ID",
+    description=("Get a car by its ID."),
+responses=error_responses(404, 500),
+)
+def get_car_by_id(car_id:UUID, car_service: CarService = Depends(get_car_service)):
+    return car_service.get_by_id(car_id)
