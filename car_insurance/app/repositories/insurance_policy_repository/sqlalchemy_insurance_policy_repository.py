@@ -1,17 +1,36 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import select, Select
 from sqlalchemy.orm import Session
 
+from app.api.schemas.pagination_schemas import PaginatedResponse
 from app.db.models import InsurancePolicy
 from app.repositories.insurance_policy_repository.base import InsurancePolicyRepository
 from app.repositories.paginator import PaginationRepositoryMixin
+from app.utils.enums.status import Status
 
 
 class SqlAlchemyInsurancePolicyRepository(PaginationRepositoryMixin, InsurancePolicyRepository):
     def __init__(self, db: Session):
         self.db = db
 
+    def get_policies(self,
+                     page: int,
+                     per_page: int,
+                     provider:str | None = None,
+                     status: Status | None = None,
+                     ) -> PaginatedResponse:
+        statement = self._apply_filters(
+            select(InsurancePolicy),
+            provider=provider,
+            status=status,
+        )
+
+        return self.paginate_query(
+            statement,
+            page=page,
+            per_page=per_page,
+        )
 
     def create_insurance_policy(self, insurance_policy: InsurancePolicy) -> InsurancePolicy:
         self.db.add(insurance_policy)
@@ -33,3 +52,42 @@ class SqlAlchemyInsurancePolicyRepository(PaginationRepositoryMixin, InsurancePo
     def get_by_car_id(self, car_id:UUID) -> list[InsurancePolicy]:
         statement = select(InsurancePolicy).where(InsurancePolicy.car_id == car_id)
         return list(self.db.scalars(statement).all())
+
+    def _apply_filters(
+            self,
+            statement: Select,
+            provider: str | None = None,
+            status: Status | None = None,
+    ) -> Select:
+        filters = []
+
+        if provider:
+            filters.append(
+                InsurancePolicy.provider.ilike(
+                    f"%{self._escape_like(provider)}%",
+                    escape="\\",
+                )
+            )
+
+        if status:
+            filters.append(
+                InsurancePolicy.status.ilike(
+                    f"%{self._escape_like(status)}%",
+                    escape="\\",
+                )
+            )
+
+        if not filters:
+            return statement
+
+        return statement.where(*filters)
+
+    @staticmethod
+    def _escape_like(value: str) -> str:
+        return (
+            value
+            .replace("\\", "\\\\")
+            .replace("%", "\\%")
+            .replace("_", "\\_")
+        )
+
