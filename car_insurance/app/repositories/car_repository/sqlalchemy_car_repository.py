@@ -15,13 +15,13 @@ class SqlAlchemyCarRepository(PaginationRepositoryMixin, CarRepository):
         self.db = db
 
     def get_cars(
-        self,
-        page: int,
-        per_page: int,
-        make: str | None = None,
-        model: str | None = None,
-        category: CarCategory | None = None,
-        owner_id: UUID | None = None,
+            self,
+            page: int,
+            per_page: int,
+            make: str | None = None,
+            model: str | None = None,
+            category: CarCategory | None = None,
+            owner_id: UUID | None = None,
     ):
         statement = self._apply_filters(
             select(Car),
@@ -52,13 +52,18 @@ class SqlAlchemyCarRepository(PaginationRepositoryMixin, CarRepository):
         statement = select(Car).where(Car.vin == vin)
         return self.db.scalar(statement)
 
+    def delete_car(self, car: Car) -> None:
+
+        self.db.delete(car)
+        self.db.commit()
+
     def _apply_filters(
-        self,
-        statement: Select,
-        make: str | None = None,
-        model: str | None = None,
-        category: CarCategory | None = None,
-        owner_id: UUID | None = None,
+            self,
+            statement: Select,
+            make: str | None = None,
+            model: str | None = None,
+            category: CarCategory | None = None,
+            owner_id: UUID | None = None,
     ) -> Select:
         filters = []
 

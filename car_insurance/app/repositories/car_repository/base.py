@@ -23,7 +23,9 @@ class CarRepository(Protocol):
 
     def get_by_vin(self, vin: str) -> Car | None: ...
 
-    def delete_car(self, car: Car) -> None: ...
+    def delete_car(self, car:Car) -> None: ...
+
+
 
 
 

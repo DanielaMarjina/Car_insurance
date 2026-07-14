@@ -4,15 +4,16 @@ import logging
 from app.api.schemas.car_schemas import CarDetailResponse, CarCreate
 from app.api.schemas.pagination_schemas import PaginatedResponse
 from app.db.models import Car
-from app.exceptions.car_exceptions import CarAlreadyExistsError
+from app.exceptions.car_exceptions import CarAlreadyExistsError, CarNotFoundError
 from app.repositories.car_repository.base import CarRepository
 from app.utils.enums.car_category import CarCategory
 
 logger = logging.getLogger(__name__)
 
+
 class CarService:
     def __init__(self, repository: CarRepository) -> None:
-            self.repository = repository
+        self.repository = repository
 
     def get_by_id(self, car_id: UUID) -> Car:
         car = self.repository.get_by_car_id(car_id)
@@ -26,7 +27,7 @@ class CarService:
     def create_car(self, request: CarCreate) -> Car:
         logger.info("Creating car")
 
-        vin=request.vin
+        vin = request.vin
 
         if vin:
             existing_car = self.repository.get_by_vin(vin)
@@ -52,8 +53,15 @@ class CarService:
 
         return created_car
 
+    def delete_car(self, car_id: UUID) -> None:
+        logger.info("Deleting car %s", car_id)
+        car = self.repository.get_by_car_id(car_id)
 
+        if not car:
+            raise CarNotFoundError(car_id)
 
+        self.repository.delete_car(car)
+        logger.info("Deleted car %s", car_id)
 
     def get_cars(
             self,
@@ -63,7 +71,7 @@ class CarService:
             model: str | None = None,
             category: CarCategory | None = None,
             owner_id: UUID | None = None,
-    ) ->PaginatedResponse[CarDetailResponse]:
+    ) -> PaginatedResponse[CarDetailResponse]:
         logger.info("Retrieving cars")
         return self.repository.get_cars(
             page=page,
