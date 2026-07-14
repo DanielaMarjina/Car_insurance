@@ -143,13 +143,13 @@ class Car(Base):
     insurance_policies: Mapped[list["InsurancePolicy"]] = relationship(
         back_populates="car",
         cascade="all, delete-orphan",
-        passive_deletes=True,
+
     )
 
     claims: Mapped[list["Claim"]] = relationship(
         back_populates="car",
         cascade="all, delete-orphan",
-        passive_deletes=True,
+
     )
 
 

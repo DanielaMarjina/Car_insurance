@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query,status
+from fastapi import APIRouter, Depends, Query, status
 
 from app.api.deps import get_car_service
 from app.api.responses import error_responses
@@ -49,8 +49,9 @@ def get_cars(
         owner_id=owner_id
     )
 
+
 @cars_router.post(
-    "/create",
+    "/",
     response_model=CarDetailResponse,
     status_code=status.HTTP_201_CREATED,
     summary="Create car",
@@ -61,5 +62,17 @@ def create_car(
         car_data: CarCreate,
         car_service: CarService = Depends(get_car_service),
 ):
-
     return car_service.create_car(car_data)
+
+
+@cars_router.delete(
+    "/{car_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    summary="Delete car",
+    description=(
+            "Delete a car by its ID."
+    ),
+    responses=error_responses(404, 500),
+)
+def delete_car(car_id: UUID, car_service: CarService = Depends(get_car_service),)->None:
+    car_service.delete_car(car_id)
