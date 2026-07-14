@@ -1,8 +1,12 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Query, Depends
 
 from app.api.deps import get_insurance_policy_service
 from app.api.schemas.insurance_policy_schemas import InsurancePolicyDetailResponse
 from app.api.schemas.pagination_schemas import PaginatedResponse
+from app.db.models import InsurancePolicy
+from app.services import insurance_policy_service
 from app.services.insurance_policy_service import InsurancePolicyService
 from app.utils.enums.status import Status
 
@@ -28,3 +32,12 @@ def get_policies(
         provider=provider,
         status=status,
     )
+
+@policies_router.get(
+    path="/active-policy",
+    response_model=InsurancePolicyDetailResponse,
+)
+def get_active_policy_for_car(car_id : UUID,
+                              insurance_policy_service: InsurancePolicyService = Depends(get_insurance_policy_service),
+                              ) ->InsurancePolicyDetailResponse:
+    return insurance_policy_service.get_active_policy_for_car(car_id=car_id)
