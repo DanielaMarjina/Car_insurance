@@ -22,8 +22,8 @@ policies_router = APIRouter(prefix="/api/policies", tags=["Insurance Policy"])
 def get_policies(
         page: int = Query(default=1, ge=1),
         per_page: int = Query(default=50, ge=1, le=100),
-        provider:str = Query(default="Groupama", description="Provider name"),
-        status:Status = Query(default="ACTIVE", description="Status of the policy"),
+        provider:str = Query(default=None, description="Provider name"),
+        status:Status = Query(default=None, description="Status of the policy"),
         insurance_policy_service: InsurancePolicyService = Depends(get_insurance_policy_service),
 ) -> PaginatedResponse[InsurancePolicyDetailResponse]:
     return insurance_policy_service.get_policies(
